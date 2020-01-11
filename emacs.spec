@@ -1,26 +1,20 @@
 %global _hardened_build 1
 %bcond_with bootstrap
 
-Name:		emacs
-Epoch:          1
-Version:	26.1
-Release:	10
-Summary:	An extensible GNU text editor
-License:	GPLv3+ and CC0-1.0
-URL:		http://www.gnu.org/software/emacs
+Name:          emacs
+Epoch:         1
+Version:       26.1
+Release:       11
+Summary:       An extensible GNU text editor
+License:       GPLv3+ and CC0-1.0
+URL:           http://www.gnu.org/software/emacs
+Source0:       https://ftp.gnu.org/gnu/%{name}/%{name}-%{version}.tar.xz
+Source3:       site-start.el
+Source4:       default.el
+Source7:       emacs.service
 
-Source0:        https://ftp.gnu.org/gnu/%{name}/%{name}-%{version}.tar.xz
-Source1:        emacs.desktop
-Source2:        dotemacs.el
-Source3:        site-start.el
-Source4:        default.el
-Source5:        emacs-terminal.desktop
-Source6:        emacs-terminal.sh
-Source7:        emacs.service
-
-Patch1:        emacs-spellchecker.patch
-Patch2:        emacs-system-crypto-policies.patch
-Patch3:        emacs-xft-color-font-crash.patch
+Patch1:        emacs-system-crypto-policies.patch
+Patch2:        emacs-xft-color-font-crash.patch
 
 BuildRequires: gcc atk-devel cairo-devel freetype-devel fontconfig-devel dbus-devel giflib-devel
 BuildRequires: glibc-devel zlib-devel gnutls-devel libselinux-devel GConf2-devel alsa-lib-devel
@@ -98,14 +92,6 @@ Obsoletes:     emacs-el < 1:24.3-29
 This package contains all the common files needed by emacs, emacs-lucid
 or emacs-nox.
 
-%package       terminal
-Summary:       A desktop menu item for GNU Emacs terminal.
-Requires:      emacs = %{epoch}:%{version}-%{release}
-BuildArch:     noarch
-
-%description   terminal
-A desktop menu item for GNU Emacs terminal.
-
 %package       filesystem
 Summary:       Emacs filesystem layout
 BuildArch:     noarch
@@ -119,8 +105,6 @@ Emacs filesystem layout
 %autosetup -n %{name}-%{version} -p1
 
 autoconf
-
-cp %SOURCE1 etc/emacs.desktop
 
 egrep -v "tetris.elc|pong.elc" lisp/Makefile.in > lisp/Makefile.in.new && mv lisp/Makefile.in.new lisp/Makefile.in
 
@@ -248,15 +232,11 @@ mv %{buildroot}%{_infodir}/info.info.gz %{buildroot}%{_infodir}/info.gz
 
 install -d %{buildroot}%{_datadir}/emacs/site-lisp/site-start.d
 
-install -d %{buildroot}%{_sysconfdir}/skel
-install -p -m 0644 %SOURCE2 %{buildroot}%{_sysconfdir}/skel/.emacs
-
 install -d %{buildroot}/%{_datadir}/pkgconfig
 install -p -m 0644 emacs.pc %{buildroot}/%{_datadir}/pkgconfig
 
 install -d %{buildroot}%{_rpmconfigdir}/macros.d
 install -p -m 0644 macros.emacs %{buildroot}%{_rpmconfigdir}/macros.d/
-install -p -m 755 %SOURCE6 %{buildroot}%{_bindir}/emacs-terminal
 
 rm -f %{buildroot}%{_infodir}/dir
 
@@ -265,10 +245,6 @@ install -p -m 0644 %SOURCE7 %{buildroot}%{_userunitdir}/emacs.service
 
 # Emacs 26.1 don't installs the upstream unit file to /usr/lib64 on 64bit archs.
 rm -f %{buildroot}/usr/lib64/systemd/user/emacs.service
-
-install -d %{buildroot}%{_datadir}/applications
-desktop-file-install --dir=%{buildroot}%{_datadir}/applications %SOURCE1
-desktop-file-install --dir=%{buildroot}%{_datadir}/applications %SOURCE5
 
 rm -f *-filelist {common,el}-*-files
 
@@ -281,7 +257,6 @@ rm -f *-filelist {common,el}-*-files
 sed -i -e "s|\.%{_prefix}|%{_prefix}|" *-files
 cat common-*-files > common-filelist
 cat el-*-files common-lisp-dir-files > el-filelist
-rm %{buildroot}%{_datadir}/icons/hicolor/scalable/mimetypes/emacs-document23.svg
 
 %preun
 %{_sbindir}/alternatives --remove emacs %{_bindir}/emacs-%{version}
@@ -354,7 +329,6 @@ fi
 %doc doc/NEWS BUGS README
 %license etc/COPYING
 %{_rpmconfigdir}/macros.d/macros.emacs
-%config(noreplace) %{_sysconfdir}/skel/.emacs
 %attr(0644,root,root) %config(noreplace) %{_datadir}/emacs/site-lisp/default.el
 %attr(0644,root,root) %config %{_datadir}/emacs/site-lisp/site-start.el
 %{_bindir}/gctags
@@ -369,11 +343,6 @@ fi
 %{_datadir}/emacs/%{version}/site-lisp
 %{_infodir}/*
 
-%files       terminal
-%defattr(-,root,root)
-%{_bindir}/emacs-terminal
-%{_datadir}/applications/emacs-terminal.desktop
-
 %files       filesystem
 %defattr(-,root,root)
 %dir %{_datadir}/emacs
@@ -387,6 +356,9 @@ fi
 %{_infodir}/*
 
 %changelog
+* Sat Jan 11 2020 openEuler Buildteam <buildteam@openeuler.org> - 1:26.1-11
+- remove unnecessary source
+
 * Sat Dec 28 2019 openEuler Buildteam <buildteam@openeuler.org> - 1:26.1-10
 - Type:bugfix
 - ID:NA
