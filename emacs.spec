@@ -4,7 +4,7 @@
 Name:          emacs
 Epoch:         1
 Version:       26.1
-Release:       11
+Release:       12
 Summary:       An extensible GNU text editor
 License:       GPLv3+ and CC0-1.0
 URL:           http://www.gnu.org/software/emacs
@@ -13,8 +13,9 @@ Source3:       site-start.el
 Source4:       default.el
 Source7:       emacs.service
 
-Patch1:        emacs-system-crypto-policies.patch
-Patch2:        emacs-xft-color-font-crash.patch
+Patch1:        emacs-spellchecker.patch
+Patch2:        emacs-system-crypto-policies.patch
+Patch3:        emacs-xft-color-font-crash.patch
 
 BuildRequires: gcc atk-devel cairo-devel freetype-devel fontconfig-devel dbus-devel giflib-devel
 BuildRequires: glibc-devel zlib-devel gnutls-devel libselinux-devel GConf2-devel alsa-lib-devel
@@ -134,19 +135,18 @@ ln -s ../../%{name}/%{version}/etc/COPYING doc
 ln -s ../../%{name}/%{version}/etc/NEWS doc
 
 %build
-export CFLAGS="-DMAIL_USE_LOCKF %{optflags}"
-export HARDENING_PIE=0
+export CFLAGS="-DMAIL_USE_LOCKF $RPM_OPT_FLAGS -fPIE"
 
 %if !%{with bootstrap}
 # Build GTK+ binary
 mkdir build-gtk && cd build-gtk
 ln -s ../configure .
 
-LDFLAGS=-Wl,-z,relro;  export LDFLAGS;
+LDFLAGS="-Wl,-z,relro,-z,now -pie";  export LDFLAGS;
 
 %configure --with-dbus --with-gif --with-jpeg --with-png --with-rsvg \
            --with-tiff --with-xft --with-xpm --with-x-toolkit=gtk3 --with-gpm=no \
-           --with-xwidgets --with-modules   --without-libotf --without-m17n-flt --without-imagemagick
+           --with-xwidgets --with-modules   --without-libotf --without-m17n-flt --without-imagemagick CANNOT_DUMP=yes
 make bootstrap
 %{setarch} %make_build
 cd ..
@@ -155,11 +155,11 @@ cd ..
 mkdir build-lucid && cd build-lucid
 ln -s ../configure .
 
-LDFLAGS=-Wl,-z,relro;  export LDFLAGS;
+LDFLAGS="-Wl,-z,relro,-z,now -pie";  export LDFLAGS;
 
 %configure --with-dbus --with-gif --with-jpeg --with-png --with-rsvg \
            --with-tiff --with-xft --with-xpm --with-x-toolkit=lucid --with-gpm=no \
-           --with-modules --without-libotf --without-m17n-flt --without-imagemagick
+           --with-modules --without-libotf --without-m17n-flt --without-imagemagick CANNOT_DUMP=yes
 make bootstrap
 %{setarch} %make_build
 cd ..
@@ -168,10 +168,12 @@ cd ..
 # Build binary without X support
 mkdir build-nox && cd build-nox
 ln -s ../configure .
-%configure --with-x=no --with-modules
+
+LDFLAGS="-Wl,-z,relro,-z,now -pie";  export LDFLAGS;
+
+%configure --with-x=no --with-modules CANNOT_DUMP=yes
 %{setarch} %make_build
-cd ..
-rm build-{gtk,lucid,nox}/src/emacs-%{version}.*
+cd ../
 
 # Generate pkgconfig file
 cat > emacs.pc << EOF
@@ -356,6 +358,9 @@ fi
 %{_infodir}/*
 
 %changelog
+* Fri Mar 13 2020 songnannan <songnannan2@huawei.com> - 1:26.1-12
+- add secure compile option
+
 * Sat Jan 11 2020 openEuler Buildteam <buildteam@openeuler.org> - 1:26.1-11
 - remove unnecessary source
 
