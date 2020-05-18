@@ -4,7 +4,7 @@
 Name:          emacs
 Epoch:         1
 Version:       26.1
-Release:       12
+Release:       13
 Summary:       An extensible GNU text editor
 License:       GPLv3+ and CC0-1.0
 URL:           http://www.gnu.org/software/emacs
@@ -358,6 +358,9 @@ fi
 %{_infodir}/*
 
 %changelog
+* Mon May 18 2020 zhangrui <zhangrui182@huawei.com> - 1:26.1-13
+- rebuild for giflib
+
 * Fri Mar 13 2020 songnannan <songnannan2@huawei.com> - 1:26.1-12
 - add secure compile option
 
