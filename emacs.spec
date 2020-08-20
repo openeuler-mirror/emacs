@@ -3,19 +3,25 @@
 
 Name:          emacs
 Epoch:         1
-Version:       26.1
-Release:       13
+Version:       27.1
+Release:       1
 Summary:       An extensible GNU text editor
 License:       GPLv3+ and CC0-1.0
 URL:           http://www.gnu.org/software/emacs
 Source0:       https://ftp.gnu.org/gnu/%{name}/%{name}-%{version}.tar.xz
+Source1:       https://ftp.gnu.org/gnu/%{name}/%{name}-%{version}.tar.xz.sig
+Source2:       gpgkey-D405AA2C862C54F17EEE6BE0E8BCD7866AFCF978.gpg
 Source3:       site-start.el
 Source4:       default.el
+Source5:       dotemacs.el
+Source6:       emacs-terminal.sh
 Source7:       emacs.service
+Source8:       emacs.desktop
+Source9:       emacs-terminal.desktop
+Source10:      %{name}.appdata.xml
 
 Patch1:        emacs-spellchecker.patch
 Patch2:        emacs-system-crypto-policies.patch
-Patch3:        emacs-xft-color-font-crash.patch
 
 BuildRequires: gcc atk-devel cairo-devel freetype-devel fontconfig-devel dbus-devel giflib-devel
 BuildRequires: glibc-devel zlib-devel gnutls-devel libselinux-devel GConf2-devel alsa-lib-devel
@@ -23,13 +29,11 @@ BuildRequires: libxml2-devel bzip2 cairo texinfo gzip desktop-file-utils libacl-
 BuildRequires: libpng-devel libjpeg-turbo-devel libjpeg-turbo ncurses-devel gpm-devel libX11-devel
 BuildRequires: libXau-devel libXdmcp-devel libXrender-devel libXt-devel libXpm-devel gtk3-devel
 BuildRequires: xorg-x11-proto-devel webkit2gtk3-devel librsvg2-devel
-
-%if !%{with bootstrap}
-#BuildRequires: libotf-devel ImageMagick-devel m17n-lib-devel liblockfile-devel
+BuildRequires: autoconf harfbuzz-devel jansson-devel systemd-devel gnupg2
+BuildRequires: libotf-devel ImageMagick-devel m17n-lib-devel liblockfile-devel
 
 # For lucid
 BuildRequires: Xaw3d-devel
-%endif
 
 %ifarch %{ix86}
 BuildRequires: util-linux
@@ -54,6 +58,12 @@ At its core is an interpreter for Emacs Lisp, a dialect of the Lisp programming 
 with extensions to support text editing. And it is an entire ecosystem of functionality beyond text editing,
 including a project planner, mail and news reader, debugger interface, calendar, and more.
 
+%package       devel
+Summary:       Development header files for emacs
+
+%description   devel
+Development header files for emacs.
+
 %if !%{with bootstrap}
 %package       lucid
 Summary:       GNU Emacs text editor with LUCID toolkit X support
@@ -62,7 +72,7 @@ Requires(preun):     %{_sbindir}/alternatives
 Requires(posttrans): %{_sbindir}/alternatives
 Provides:      emacs(bin) = %{epoch}:%{version}-%{release}
 
-%description  lucid
+%description   lucid
 This package provides an emacs binary with support for X windows
 using LUCID toolkit.
 %endif
@@ -92,6 +102,14 @@ Obsoletes:     emacs-el < 1:24.3-29
 %description   common
 This package contains all the common files needed by emacs, emacs-lucid
 or emacs-nox.
+
+%package       terminal
+Summary:       A desktop menu for GNU Emacs terminal.
+Requires:      emacs = %{epoch}:%{version}-%{release}
+BuildArch:     noarch
+
+%description   terminal
+Install emacs-terminal if you need a terminal with Malayalam support.
 
 %package       filesystem
 Summary:       Emacs filesystem layout
@@ -237,8 +255,14 @@ install -d %{buildroot}%{_datadir}/emacs/site-lisp/site-start.d
 install -d %{buildroot}/%{_datadir}/pkgconfig
 install -p -m 0644 emacs.pc %{buildroot}/%{_datadir}/pkgconfig
 
+mkdir -p %{buildroot}/%{_datadir}/appdata
+cp -a %SOURCE10 %{buildroot}/%{_datadir}/appdata
+rm %{buildroot}/%{_datadir}/metainfo/emacs.appdata.xml
+
 install -d %{buildroot}%{_rpmconfigdir}/macros.d
 install -p -m 0644 macros.emacs %{buildroot}%{_rpmconfigdir}/macros.d/
+
+install -p -m 755 %SOURCE6 %{buildroot}/%{_bindir}/emacs-terminal
 
 rm -f %{buildroot}%{_infodir}/dir
 
@@ -247,6 +271,12 @@ install -p -m 0644 %SOURCE7 %{buildroot}%{_userunitdir}/emacs.service
 
 # Emacs 26.1 don't installs the upstream unit file to /usr/lib64 on 64bit archs.
 rm -f %{buildroot}/usr/lib64/systemd/user/emacs.service
+
+mkdir -p %{buildroot}%{_datadir}/applications
+desktop-file-install --dir=%{buildroot}%{_datadir}/applications \
+                     %SOURCE8
+desktop-file-install --dir=%{buildroot}%{_datadir}/applications \
+                     %SOURCE9
 
 rm -f *-filelist {common,el}-*-files
 
@@ -308,25 +338,28 @@ fi
 %license etc/COPYING
 %attr(0755,-,-) %ghost %{_bindir}/emacs
 %{_bindir}/emacs-%{version}
-%{_datadir}/appdata/*
+%{_datadir}/appdata/%{name}.appdata.xml
 %{_datadir}/icons/hicolor/*
 %{_datadir}/applications/emacs.desktop
 
+%files devel
+%{_includedir}/emacs-module.h
+
 %if !%{with bootstrap}
-%files        lucid
+%files lucid
 %defattr(-,root,root)
 %attr(0755,-,-) %ghost %{_bindir}/emacs
 %attr(0755,-,-) %ghost %{_bindir}/emacs-lucid
 %{_bindir}/emacs-%{version}-lucid
 %endif
 
-%files        nox
+%files nox
 %defattr(-,root,root)
 %attr(0755,-,-) %ghost %{_bindir}/emacs
 %attr(0755,-,-) %ghost %{_bindir}/emacs-nox
 %{_bindir}/emacs-%{version}-nox
 
-%files        common -f common-filelist -f el-filelist
+%files common -f common-filelist -f el-filelist
 %defattr(-,root,root)
 %doc doc/NEWS BUGS README
 %license etc/COPYING
@@ -345,19 +378,26 @@ fi
 %{_datadir}/emacs/%{version}/site-lisp
 %{_infodir}/*
 
-%files       filesystem
+%files terminal
+%{_bindir}/emacs-terminal
+%{_datadir}/applications/emacs-terminal.desktop
+
+%files filesystem
 %defattr(-,root,root)
 %dir %{_datadir}/emacs
 %dir %{_datadir}/emacs/site-lisp
 %dir %{_datadir}/emacs/site-lisp/site-start.d
 
-%files       help
+%files help
 %defattr(-,root,root)
 %doc doc/NEWS BUGS README
 %{_mandir}/*/*
 %{_infodir}/*
 
 %changelog
+* Wed Aug 19 2020 xiaoweiwei <xiaoweiwei5@huawei.com> - 1:27.1-1
+- upgrade to 27.1
+
 * Mon May 18 2020 zhangrui <zhangrui182@huawei.com> - 1:26.1-13
 - rebuild for giflib
 
