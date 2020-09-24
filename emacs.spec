@@ -4,7 +4,7 @@
 Name:          emacs
 Epoch:         1
 Version:       27.1
-Release:       1
+Release:       2
 Summary:       An extensible GNU text editor
 License:       GPLv3+ and CC0-1.0
 URL:           http://www.gnu.org/software/emacs
@@ -221,13 +221,19 @@ cd ..
 rm %{buildroot}%{_bindir}/emacs
 touch %{buildroot}%{_bindir}/emacs
 
+rm %{buildroot}%{emacs_libexecdir}/emacs.pdmp
+
 gunzip %{buildroot}%{_datadir}/emacs/%{version}/lisp/jka*.el.gz
+
+install -p -m 0644 build-gtk/src/emacs.pdmp %{buildroot}%{_bindir}/emacs-%{version}.pdmp
 
 %if !%{with bootstrap}
 install -p -m 0755 build-lucid/src/emacs %{buildroot}%{_bindir}/emacs-%{version}-lucid
+install -p -m 0644 build-lucid/src/emacs.pdmp %{buildroot}%{_bindir}/emacs-%{version}-lucid.pdmp
 %endif
 
 install -p -m 0755 build-nox/src/emacs %{buildroot}%{_bindir}/emacs-%{version}-nox
+install -p -m 0644 build-nox/src/emacs.pdmp %{buildroot}%{_bindir}/emacs-%{version}-nox.pdmp
 
 chmod 755 %{buildroot}%{emacs_libexecdir}/movemail
 
@@ -338,6 +344,7 @@ fi
 %license etc/COPYING
 %attr(0755,-,-) %ghost %{_bindir}/emacs
 %{_bindir}/emacs-%{version}
+%{_bindir}/emacs-%{version}.pdmp
 %{_datadir}/appdata/%{name}.appdata.xml
 %{_datadir}/icons/hicolor/*
 %{_datadir}/applications/emacs.desktop
@@ -351,6 +358,7 @@ fi
 %attr(0755,-,-) %ghost %{_bindir}/emacs
 %attr(0755,-,-) %ghost %{_bindir}/emacs-lucid
 %{_bindir}/emacs-%{version}-lucid
+%{_bindir}/emacs-%{version}-lucid.pdmp
 %endif
 
 %files nox
@@ -358,6 +366,7 @@ fi
 %attr(0755,-,-) %ghost %{_bindir}/emacs
 %attr(0755,-,-) %ghost %{_bindir}/emacs-nox
 %{_bindir}/emacs-%{version}-nox
+%{_bindir}/emacs-%{version}-nox.pdmp
 
 %files common -f common-filelist -f el-filelist
 %defattr(-,root,root)
@@ -395,6 +404,12 @@ fi
 %{_infodir}/*
 
 %changelog
+* Wed Sep 23 2020 hanhui <hanhui15@huawei.com> - 1:27.1-2
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC:slove the problem of mercurial compile failed
+
 * Wed Aug 19 2020 xiaoweiwei <xiaoweiwei5@huawei.com> - 1:27.1-1
 - upgrade to 27.1
 
