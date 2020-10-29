@@ -3,18 +3,21 @@
 
 Name:          emacs
 Epoch:         1
-Version:       26.3
-Release:       1
+Version:       27.1
+Release:       2
 Summary:       An extensible GNU text editor
 License:       GPLv3+ and CC0-1.0
 URL:           http://www.gnu.org/software/emacs
 Source0:       https://ftp.gnu.org/gnu/%{name}/%{name}-%{version}.tar.xz
-Source1:       site-start.el
-Source2:       emacs.service
-Source3:       emacs.desktop
+Source1:       https://ftp.gnu.org/gnu/%{name}/%{name}-%{version}.tar.xz.sig
+Source2:       gpgkey-D405AA2C862C54F17EEE6BE0E8BCD7866AFCF978.gpg
+Source3:       site-start.el
 Source4:       default.el
-Source7:       emacs-terminal.desktop
-Source8:       emacs-terminal.sh
+Source5:       dotemacs.el
+Source6:       emacs-terminal.sh
+Source7:       emacs.service
+Source8:       emacs.desktop
+Source9:       emacs-terminal.desktop
 Source10:      %{name}.appdata.xml
 
 Patch1:        emacs-spellchecker.patch
@@ -26,7 +29,9 @@ BuildRequires: libxml2-devel bzip2 cairo texinfo gzip desktop-file-utils libacl-
 BuildRequires: libpng-devel libjpeg-turbo-devel libjpeg-turbo ncurses-devel gpm-devel libX11-devel
 BuildRequires: libXau-devel libXdmcp-devel libXrender-devel libXt-devel libXpm-devel gtk3-devel
 BuildRequires: xorg-x11-proto-devel webkit2gtk3-devel librsvg2-devel
+BuildRequires: autoconf harfbuzz-devel jansson-devel systemd-devel gnupg2
 BuildRequires: libotf-devel ImageMagick-devel m17n-lib-devel liblockfile-devel
+
 # For lucid
 BuildRequires: Xaw3d-devel
 
@@ -53,10 +58,10 @@ At its core is an interpreter for Emacs Lisp, a dialect of the Lisp programming 
 with extensions to support text editing. And it is an entire ecosystem of functionality beyond text editing,
 including a project planner, mail and news reader, debugger interface, calendar, and more.
 
-%package devel
-Summary: Development header files for emacs
+%package       devel
+Summary:       Development header files for emacs
 
-%description devel
+%description   devel
 Development header files for emacs.
 
 %if !%{with bootstrap}
@@ -67,7 +72,7 @@ Requires(preun):     %{_sbindir}/alternatives
 Requires(posttrans): %{_sbindir}/alternatives
 Provides:      emacs(bin) = %{epoch}:%{version}-%{release}
 
-%description  lucid
+%description   lucid
 This package provides an emacs binary with support for X windows
 using LUCID toolkit.
 %endif
@@ -98,7 +103,7 @@ Obsoletes:     emacs-el < 1:24.3-29
 This package contains all the common files needed by emacs, emacs-lucid
 or emacs-nox.
 
-%package terminal
+%package       terminal
 Summary:       A desktop menu for GNU Emacs terminal.
 Requires:      emacs = %{epoch}:%{version}-%{release}
 BuildArch:     noarch
@@ -216,19 +221,25 @@ cd ..
 rm %{buildroot}%{_bindir}/emacs
 touch %{buildroot}%{_bindir}/emacs
 
+rm %{buildroot}%{emacs_libexecdir}/emacs.pdmp
+
 gunzip %{buildroot}%{_datadir}/emacs/%{version}/lisp/jka*.el.gz
+
+install -p -m 0644 build-gtk/src/emacs.pdmp %{buildroot}%{_bindir}/emacs-%{version}.pdmp
 
 %if !%{with bootstrap}
 install -p -m 0755 build-lucid/src/emacs %{buildroot}%{_bindir}/emacs-%{version}-lucid
+install -p -m 0644 build-lucid/src/emacs.pdmp %{buildroot}%{_bindir}/emacs-%{version}-lucid.pdmp
 %endif
 
 install -p -m 0755 build-nox/src/emacs %{buildroot}%{_bindir}/emacs-%{version}-nox
+install -p -m 0644 build-nox/src/emacs.pdmp %{buildroot}%{_bindir}/emacs-%{version}-nox.pdmp
 
 chmod 755 %{buildroot}%{emacs_libexecdir}/movemail
 
 # Confirm movemail don't setgid
 mkdir -p %{buildroot}%{site_lisp}
-install -p -m 0644 %SOURCE1 %{buildroot}%{_datadir}/emacs/site-lisp/site-start.el
+install -p -m 0644 %SOURCE3 %{buildroot}%{_datadir}/emacs/site-lisp/site-start.el
 install -p -m 0644 %SOURCE4 %{buildroot}%{_datadir}/emacs/site-lisp
 
 echo "(setq source-directory \"%{_datadir}/emacs/%{version}/\")" >> %{buildroot}%{_datadir}/emacs/site-lisp/site-start.el
@@ -257,21 +268,21 @@ rm %{buildroot}/%{_datadir}/metainfo/emacs.appdata.xml
 install -d %{buildroot}%{_rpmconfigdir}/macros.d
 install -p -m 0644 macros.emacs %{buildroot}%{_rpmconfigdir}/macros.d/
 
-install -p -m 755 %SOURCE8 %{buildroot}%{_bindir}/emacs-terminal
+install -p -m 755 %SOURCE6 %{buildroot}/%{_bindir}/emacs-terminal
 
 rm -f %{buildroot}%{_infodir}/dir
 
 install -d %{buildroot}%{_userunitdir}
-install -p -m 0644 %SOURCE2 %{buildroot}%{_userunitdir}/emacs.service
+install -p -m 0644 %SOURCE7 %{buildroot}%{_userunitdir}/emacs.service
 
 # Emacs 26.1 don't installs the upstream unit file to /usr/lib64 on 64bit archs.
 rm -f %{buildroot}/usr/lib64/systemd/user/emacs.service
 
 mkdir -p %{buildroot}%{_datadir}/applications
 desktop-file-install --dir=%{buildroot}%{_datadir}/applications \
-                     %SOURCE3
+                     %SOURCE8
 desktop-file-install --dir=%{buildroot}%{_datadir}/applications \
-                     %SOURCE7
+                     %SOURCE9
 
 rm -f *-filelist {common,el}-*-files
 
@@ -333,6 +344,7 @@ fi
 %license etc/COPYING
 %attr(0755,-,-) %ghost %{_bindir}/emacs
 %{_bindir}/emacs-%{version}
+%{_bindir}/emacs-%{version}.pdmp
 %{_datadir}/appdata/%{name}.appdata.xml
 %{_datadir}/icons/hicolor/*
 %{_datadir}/applications/emacs.desktop
@@ -341,20 +353,22 @@ fi
 %{_includedir}/emacs-module.h
 
 %if !%{with bootstrap}
-%files        lucid
+%files lucid
 %defattr(-,root,root)
 %attr(0755,-,-) %ghost %{_bindir}/emacs
 %attr(0755,-,-) %ghost %{_bindir}/emacs-lucid
 %{_bindir}/emacs-%{version}-lucid
+%{_bindir}/emacs-%{version}-lucid.pdmp
 %endif
 
-%files        nox
+%files nox
 %defattr(-,root,root)
 %attr(0755,-,-) %ghost %{_bindir}/emacs
 %attr(0755,-,-) %ghost %{_bindir}/emacs-nox
 %{_bindir}/emacs-%{version}-nox
+%{_bindir}/emacs-%{version}-nox.pdmp
 
-%files        common -f common-filelist -f el-filelist
+%files common -f common-filelist -f el-filelist
 %defattr(-,root,root)
 %doc doc/NEWS BUGS README
 %license etc/COPYING
@@ -377,21 +391,30 @@ fi
 %{_bindir}/emacs-terminal
 %{_datadir}/applications/emacs-terminal.desktop
 
-%files       filesystem
+%files filesystem
 %defattr(-,root,root)
 %dir %{_datadir}/emacs
 %dir %{_datadir}/emacs/site-lisp
 %dir %{_datadir}/emacs/site-lisp/site-start.d
 
-%files       help
+%files help
 %defattr(-,root,root)
 %doc doc/NEWS BUGS README
 %{_mandir}/*/*
 %{_infodir}/*
 
 %changelog
-* Tue Jul 28 2020 wangye <wangye70@huawei.com> - 1:26.3-1
-- version update to 23.3
+* Wed Sep 23 2020 hanhui <hanhui15@huawei.com> - 1:27.1-2
+- Type:bugfix
+- ID:NA
+- SUG:NA
+- DESC:slove the problem of mercurial compile failed
+
+* Wed Aug 19 2020 xiaoweiwei <xiaoweiwei5@huawei.com> - 1:27.1-1
+- upgrade to 27.1
+
+* Mon May 18 2020 zhangrui <zhangrui182@huawei.com> - 1:26.1-13
+- rebuild for giflib
 
 * Fri Mar 13 2020 songnannan <songnannan2@huawei.com> - 1:26.1-12
 - add secure compile option
