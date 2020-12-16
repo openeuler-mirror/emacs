@@ -4,7 +4,7 @@
 Name:          emacs
 Epoch:         1
 Version:       27.1
-Release:       3
+Release:       4
 Summary:       An extensible GNU text editor
 License:       GPLv3+ and CC0-1.0
 URL:           http://www.gnu.org/software/emacs
@@ -398,6 +398,9 @@ fi
 %{_infodir}/*
 
 %changelog
+* Wed Dec 16 2020 jinzhimin <jinzhimin2@huawei.com> - 1:27.1-4
+- remove unnecessary patch
+
 * Wed Dec 16 2020 jinzhimin <jinzhimin2@huawei.com> - 1:27.1-3
 - fix emacs run failed
 
