@@ -4,21 +4,19 @@
 Name:          emacs
 Epoch:         1
 Version:       27.1
-Release:       2
+Release:       3
 Summary:       An extensible GNU text editor
 License:       GPLv3+ and CC0-1.0
 URL:           http://www.gnu.org/software/emacs
 Source0:       https://ftp.gnu.org/gnu/%{name}/%{name}-%{version}.tar.xz
-Source1:       https://ftp.gnu.org/gnu/%{name}/%{name}-%{version}.tar.xz.sig
-Source2:       gpgkey-D405AA2C862C54F17EEE6BE0E8BCD7866AFCF978.gpg
-Source3:       site-start.el
-Source4:       default.el
-Source5:       dotemacs.el
-Source6:       emacs-terminal.sh
-Source7:       emacs.service
-Source8:       emacs.desktop
-Source9:       emacs-terminal.desktop
-Source10:      %{name}.appdata.xml
+Source1:       site-start.el
+Source2:       default.el
+Source3:       dotemacs.el
+Source4:       emacs-terminal.sh
+Source5:       emacs.service
+Source6:       emacs.desktop
+Source7:       emacs-terminal.desktop
+Source8:       %{name}.appdata.xml
 
 Patch1:        emacs-spellchecker.patch
 Patch2:        emacs-system-crypto-policies.patch
@@ -30,7 +28,7 @@ BuildRequires: libpng-devel libjpeg-turbo-devel libjpeg-turbo ncurses-devel gpm-
 BuildRequires: libXau-devel libXdmcp-devel libXrender-devel libXt-devel libXpm-devel gtk3-devel
 BuildRequires: xorg-x11-proto-devel webkit2gtk3-devel librsvg2-devel
 BuildRequires: autoconf harfbuzz-devel jansson-devel systemd-devel gnupg2
-BuildRequires: libotf-devel ImageMagick-devel m17n-lib-devel liblockfile-devel
+BuildRequires: libotf-devel m17n-lib-devel liblockfile-devel
 
 # For lucid
 BuildRequires: Xaw3d-devel
@@ -164,7 +162,8 @@ LDFLAGS="-Wl,-z,relro,-z,now -pie";  export LDFLAGS;
 
 %configure --with-dbus --with-gif --with-jpeg --with-png --with-rsvg \
            --with-tiff --with-xft --with-xpm --with-x-toolkit=gtk3 --with-gpm=no \
-           --with-xwidgets --with-modules   --without-libotf --without-m17n-flt --without-imagemagick CANNOT_DUMP=yes
+           --with-harfbuzz --with-cairo --with-json \
+           --with-xwidgets --with-modules   --without-libotf --without-m17n-flt --without-imagemagick
 make bootstrap
 %{setarch} %make_build
 cd ..
@@ -177,7 +176,8 @@ LDFLAGS="-Wl,-z,relro,-z,now -pie";  export LDFLAGS;
 
 %configure --with-dbus --with-gif --with-jpeg --with-png --with-rsvg \
            --with-tiff --with-xft --with-xpm --with-x-toolkit=lucid --with-gpm=no \
-           --with-modules --without-libotf --without-m17n-flt --without-imagemagick CANNOT_DUMP=yes
+           --with-harfbuzz --with-cairo --with-json \
+           --with-modules --without-libotf --without-m17n-flt --without-imagemagick
 make bootstrap
 %{setarch} %make_build
 cd ..
@@ -189,7 +189,7 @@ ln -s ../configure .
 
 LDFLAGS="-Wl,-z,relro,-z,now -pie";  export LDFLAGS;
 
-%configure --with-x=no --with-modules CANNOT_DUMP=yes
+%configure --with-x=no --with-modules --with-json
 %{setarch} %make_build
 cd ../
 
@@ -225,22 +225,19 @@ rm %{buildroot}%{emacs_libexecdir}/emacs.pdmp
 
 gunzip %{buildroot}%{_datadir}/emacs/%{version}/lisp/jka*.el.gz
 
-install -p -m 0644 build-gtk/src/emacs.pdmp %{buildroot}%{_bindir}/emacs-%{version}.pdmp
 
 %if !%{with bootstrap}
 install -p -m 0755 build-lucid/src/emacs %{buildroot}%{_bindir}/emacs-%{version}-lucid
-install -p -m 0644 build-lucid/src/emacs.pdmp %{buildroot}%{_bindir}/emacs-%{version}-lucid.pdmp
 %endif
 
 install -p -m 0755 build-nox/src/emacs %{buildroot}%{_bindir}/emacs-%{version}-nox
-install -p -m 0644 build-nox/src/emacs.pdmp %{buildroot}%{_bindir}/emacs-%{version}-nox.pdmp
 
 chmod 755 %{buildroot}%{emacs_libexecdir}/movemail
 
 # Confirm movemail don't setgid
 mkdir -p %{buildroot}%{site_lisp}
-install -p -m 0644 %SOURCE3 %{buildroot}%{_datadir}/emacs/site-lisp/site-start.el
-install -p -m 0644 %SOURCE4 %{buildroot}%{_datadir}/emacs/site-lisp
+install -p -m 0644 %SOURCE1 %{buildroot}%{_datadir}/emacs/site-lisp/site-start.el
+install -p -m 0644 %SOURCE2 %{buildroot}%{_datadir}/emacs/site-lisp
 
 echo "(setq source-directory \"%{_datadir}/emacs/%{version}/\")" >> %{buildroot}%{_datadir}/emacs/site-lisp/site-start.el
 
@@ -262,27 +259,27 @@ install -d %{buildroot}/%{_datadir}/pkgconfig
 install -p -m 0644 emacs.pc %{buildroot}/%{_datadir}/pkgconfig
 
 mkdir -p %{buildroot}/%{_datadir}/appdata
-cp -a %SOURCE10 %{buildroot}/%{_datadir}/appdata
+cp -a %SOURCE8 %{buildroot}/%{_datadir}/appdata
 rm %{buildroot}/%{_datadir}/metainfo/emacs.appdata.xml
 
 install -d %{buildroot}%{_rpmconfigdir}/macros.d
 install -p -m 0644 macros.emacs %{buildroot}%{_rpmconfigdir}/macros.d/
 
-install -p -m 755 %SOURCE6 %{buildroot}/%{_bindir}/emacs-terminal
+install -p -m 755 %SOURCE4 %{buildroot}/%{_bindir}/emacs-terminal
 
 rm -f %{buildroot}%{_infodir}/dir
 
 install -d %{buildroot}%{_userunitdir}
-install -p -m 0644 %SOURCE7 %{buildroot}%{_userunitdir}/emacs.service
+install -p -m 0644 %SOURCE5 %{buildroot}%{_userunitdir}/emacs.service
 
 # Emacs 26.1 don't installs the upstream unit file to /usr/lib64 on 64bit archs.
 rm -f %{buildroot}/usr/lib64/systemd/user/emacs.service
 
 mkdir -p %{buildroot}%{_datadir}/applications
 desktop-file-install --dir=%{buildroot}%{_datadir}/applications \
-                     %SOURCE8
+                     %SOURCE6
 desktop-file-install --dir=%{buildroot}%{_datadir}/applications \
-                     %SOURCE9
+                     %SOURCE7
 
 rm -f *-filelist {common,el}-*-files
 
@@ -344,7 +341,6 @@ fi
 %license etc/COPYING
 %attr(0755,-,-) %ghost %{_bindir}/emacs
 %{_bindir}/emacs-%{version}
-%{_bindir}/emacs-%{version}.pdmp
 %{_datadir}/appdata/%{name}.appdata.xml
 %{_datadir}/icons/hicolor/*
 %{_datadir}/applications/emacs.desktop
@@ -358,7 +354,6 @@ fi
 %attr(0755,-,-) %ghost %{_bindir}/emacs
 %attr(0755,-,-) %ghost %{_bindir}/emacs-lucid
 %{_bindir}/emacs-%{version}-lucid
-%{_bindir}/emacs-%{version}-lucid.pdmp
 %endif
 
 %files nox
@@ -366,7 +361,6 @@ fi
 %attr(0755,-,-) %ghost %{_bindir}/emacs
 %attr(0755,-,-) %ghost %{_bindir}/emacs-nox
 %{_bindir}/emacs-%{version}-nox
-%{_bindir}/emacs-%{version}-nox.pdmp
 
 %files common -f common-filelist -f el-filelist
 %defattr(-,root,root)
@@ -404,6 +398,9 @@ fi
 %{_infodir}/*
 
 %changelog
+* Wed Dec 16 2020 jinzhimin <jinzhimin2@huawei.com> - 1:27.1-3
+- fix emacs run failed
+
 * Wed Sep 23 2020 hanhui <hanhui15@huawei.com> - 1:27.1-2
 - Type:bugfix
 - ID:NA
