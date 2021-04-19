@@ -4,7 +4,7 @@
 Name:          emacs
 Epoch:         1
 Version:       27.1
-Release:       4
+Release:       5
 Summary:       An extensible GNU text editor
 License:       GPLv3+ and CC0-1.0
 URL:           http://www.gnu.org/software/emacs
@@ -164,7 +164,7 @@ LDFLAGS="-Wl,-z,relro,-z,now -pie";  export LDFLAGS;
            --with-tiff --with-xft --with-xpm --with-x-toolkit=gtk3 --with-gpm=no \
            --with-harfbuzz --with-cairo --with-json \
            --with-xwidgets --with-modules   --without-libotf --without-m17n-flt --without-imagemagick
-make bootstrap
+%make_build bootstrap
 %{setarch} %make_build
 cd ..
 
@@ -178,7 +178,7 @@ LDFLAGS="-Wl,-z,relro,-z,now -pie";  export LDFLAGS;
            --with-tiff --with-xft --with-xpm --with-x-toolkit=lucid --with-gpm=no \
            --with-harfbuzz --with-cairo --with-json \
            --with-modules --without-libotf --without-m17n-flt --without-imagemagick
-make bootstrap
+%make_build bootstrap
 %{setarch} %make_build
 cd ..
 %endif
@@ -398,6 +398,11 @@ fi
 %{_infodir}/*
 
 %changelog
+* Fri Apr 19 2021 wangkerong <wangkerong@huawei.com> - 1:27.1-5
+- Type: improvement
+- DESC: use %make_build instead of make for building bootstrap
+
+
 * Wed Dec 16 2020 jinzhimin <jinzhimin2@huawei.com> - 1:27.1-4
 - remove unnecessary patch
 
