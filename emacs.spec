@@ -398,10 +398,9 @@ fi
 %{_infodir}/*
 
 %changelog
-* Fri Apr 19 2021 wangkerong <wangkerong@huawei.com> - 1:27.1-5
+* Mon Apr 19 2021 wangkerong <wangkerong@huawei.com> - 1:27.1-5
 - Type: improvement
 - DESC: use %make_build instead of make for building bootstrap
-
 
 * Wed Dec 16 2020 jinzhimin <jinzhimin2@huawei.com> - 1:27.1-4
 - remove unnecessary patch
