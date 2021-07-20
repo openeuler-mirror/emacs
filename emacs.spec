@@ -3,8 +3,8 @@
 
 Name:          emacs
 Epoch:         1
-Version:       27.1
-Release:       5
+Version:       27.2
+Release:       1
 Summary:       An extensible GNU text editor
 License:       GPLv3+ and CC0-1.0
 URL:           http://www.gnu.org/software/emacs
@@ -398,6 +398,9 @@ fi
 %{_infodir}/*
 
 %changelog
+* Mon Jul 19 2021 wangkerong <wangkerong@huawei.com> - 1:27.2-1
+- DESC:upgrade to 1:27.2
+
 * Wed Dec 09 2020 chenyanpan <chenyanpan@huawei.com> - 1:27.1-5
 - Type: improvement
 - DESC: use %make_build instead of make for building bootstrap
