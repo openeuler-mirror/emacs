@@ -4,7 +4,7 @@
 Name:          emacs
 Epoch:         1
 Version:       27.2
-Release:       1
+Release:       2
 Summary:       An extensible GNU text editor
 License:       GPLv3+ and CC0-1.0
 URL:           http://www.gnu.org/software/emacs
@@ -18,8 +18,9 @@ Source6:       emacs.desktop
 Source7:       emacs-terminal.desktop
 Source8:       %{name}.appdata.xml
 
-Patch1:        emacs-spellchecker.patch
-Patch2:        emacs-system-crypto-policies.patch
+Patch6001:        emacs-spellchecker.patch
+Patch6002:        emacs-system-crypto-policies.patch
+Patch6003:        backport-emacs-glibc-2.34.patch
 
 BuildRequires: gcc atk-devel cairo-devel freetype-devel fontconfig-devel dbus-devel giflib-devel
 BuildRequires: glibc-devel zlib-devel gnutls-devel libselinux-devel GConf2-devel alsa-lib-devel
@@ -398,8 +399,11 @@ fi
 %{_infodir}/*
 
 %changelog
+* Tue Aug 10 2021 yanan <yanan@huawei.com> - 1:27.2-2
+- DESC: Fix FTBFS with glibc 2.34
+
 * Mon Jul 19 2021 wangkerong <wangkerong@huawei.com> - 1:27.2-1
-- DESC:upgrade to 1:27.2
+- DESC: upgrade to 1:27.2
 
 * Wed Dec 09 2020 chenyanpan <chenyanpan@huawei.com> - 1:27.1-5
 - Type: improvement
