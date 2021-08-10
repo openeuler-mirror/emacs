@@ -4,7 +4,7 @@
 Name:          emacs
 Epoch:         1
 Version:       27.2
-Release:       2
+Release:       3
 Summary:       An extensible GNU text editor
 License:       GPLv3+ and CC0-1.0
 URL:           http://www.gnu.org/software/emacs
@@ -396,9 +396,11 @@ fi
 %defattr(-,root,root)
 %doc doc/NEWS BUGS README
 %{_mandir}/*/*
-%{_infodir}/*
 
 %changelog
+* Tue Aug 10 2021 yangcheng <yangcheng87@huawei.com> - 1:27.2-3
+- DESC: Fix the upgrade error caused by the info file in the emacs-help software package being repackaged
+
 * Tue Aug 10 2021 yanan <yanan@huawei.com> - 1:27.2-2
 - DESC: Fix FTBFS with glibc 2.34
 
