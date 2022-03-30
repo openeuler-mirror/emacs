@@ -1,0 +1,39 @@
+From 2b98d49b72e801109de870672bc071361a9b6a1b Mon Sep 17 00:00:00 2001
+From: yeah_wang <wangye70@huawei.com>
+Date: Thu, 8 Apr 2021 16:07:05 +0800
+Subject: [PATCH] emacs-deal-taboo-words
+
+---
+ etc/publicsuffix.txt   | 2 --
+ lisp/mail/mail-extr.el | 1 -
+ 2 files changed, 3 deletions(-)
+
+diff --git a/etc/publicsuffix.txt b/etc/publicsuffix.txt
+index 1ede2b9..c38649f 100644
+--- a/etc/publicsuffix.txt
++++ b/etc/publicsuffix.txt
+@@ -6259,9 +6259,7 @@ tel.tr
+ tsk.tr
+ tv.tr
+ web.tr
+-// Used by Northern Cyprus
+ nc.tr
+-// Used by government agencies of Northern Cyprus
+ gov.nc.tr
+ 
+ // tt : http://www.nic.tt/
+diff --git a/lisp/mail/mail-extr.el b/lisp/mail/mail-extr.el
+index 11918aa..f2d7fae 100644
+--- a/lisp/mail/mail-extr.el
++++ b/lisp/mail/mail-extr.el
+@@ -1932,7 +1932,6 @@ place.  It affects how `mail-extract-address-components' works."
+        ("ec" "Ecuador"		"The Republic of %s")
+        ("ee" "Estonia")
+        ("eg" "Egypt"		"The Arab Republic of %s")
+-       ("eh" "Western Sahara")
+        ("er" "Eritrea")
+        ("es" "Spain"		"The Kingdom of %s")
+        ("et" "Ethiopia")
+-- 
+2.23.0
+

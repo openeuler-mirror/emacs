@@ -4,7 +4,7 @@
 Name:          emacs
 Epoch:         1
 Version:       27.2
-Release:       3
+Release:       4
 Summary:       An extensible GNU text editor
 License:       GPLv3+ and CC0-1.0
 URL:           http://www.gnu.org/software/emacs
@@ -21,6 +21,7 @@ Source8:       %{name}.appdata.xml
 Patch6001:        emacs-spellchecker.patch
 Patch6002:        emacs-system-crypto-policies.patch
 Patch6003:        backport-emacs-glibc-2.34.patch
+Patch9000:        emacs-deal-taboo-words.patch
 
 BuildRequires: gcc atk-devel cairo-devel freetype-devel fontconfig-devel dbus-devel giflib-devel
 BuildRequires: glibc-devel zlib-devel gnutls-devel libselinux-devel GConf2-devel alsa-lib-devel
@@ -398,6 +399,9 @@ fi
 %{_mandir}/*/*
 
 %changelog
+* Mon Jan 17 2022 liuyumeng <liuyumeng5@huawei.com> - 1:27.2-4
+- round self-developed patch
+
 * Tue Aug 10 2021 yangcheng <yangcheng87@huawei.com> - 1:27.2-3
 - DESC: Fix the upgrade error caused by the info file in the emacs-help software package being repackaged
 
